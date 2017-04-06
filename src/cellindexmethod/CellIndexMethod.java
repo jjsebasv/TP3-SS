@@ -52,7 +52,7 @@ public class CellIndexMethod {
         }
     }
 
-    public Map<Particle, Set<Particle>> findNeighbors(List<Particle> particles) {
+    public Map<Particle, Set<Particle>> findNeighbors(List<? extends Particle> particles) {
 
         Map<Particle, Set<Particle>> map = new HashMap<>();
 
@@ -124,7 +124,7 @@ public class CellIndexMethod {
                 - p1.getRadius() - p2.getRadius();
     }
 
-    protected void reloadMatrix(List<Particle> particles) {
+    protected void reloadMatrix(List<? extends Particle> particles) {
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < m; j++) {
                 matrix[i][j] = new HashSet<>();
