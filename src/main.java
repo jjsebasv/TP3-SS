@@ -1,6 +1,7 @@
-import models.DynamicParticle;
+import brownianmotion.BrownianMotion;
+import com.oracle.tools.packager.Log;
+import models.MassParticle;
 import models.Particle;
-import offlatice.OffLaticeAutomaton;
 
 import java.io.*;
 import java.util.*;
@@ -14,47 +15,57 @@ public class main {
     public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
 
         // N - L - RC - n - v - T
-        int N = 300;
-        double L = 7.0;
-        double n = 0.1;
-        double vel = 0.3;
-        double Rc = 1.0;
-        int Iteraciones = 1500;
+        int N = 100;
+        double L = 0.5;
+        double vel = 0.1;
+        double Rc = 0.5;
+        double radius = 0.005;
+        double mass = 0.1;
+        double time = 100;
 
-        List<Particle> particles = generateRandomOffLaticeState(N, L, 0, Rc, vel);
-        executeOffLaticeSimulation(N, L, Rc, n, vel, Iteraciones, particles);
+        List<Particle> particles = generateRandomBrownianMotionState(N, L, radius, Rc, vel, mass);
+
+        BrownianMotion brownianMotion = new BrownianMotion(L, Rc, particles);
+
+        List<List<Particle>> simulation = brownianMotion.simulate(time);
+
+        createSimulationFile(simulation, vel);
+
     }
 
-
-    public static void executeOffLaticeSimulation(int cantParticles, double L, double rc, double n, double vel, int TMax, List<Particle> particles) {
-        generateRepetitions(1, particles, rc, n, vel, TMax, L);
-    }
-
-    private static List<Particle> generateRandomOffLaticeState(int cant_particles, double l, double radius, double rc, double vel) {
-        List<Particle> particles = new ArrayList<>(cant_particles);
+    private static List<Particle> generateRandomBrownianMotionState(int cantParticles, double l, double radius, double rc, double vel, double mass) {
+        List<Particle> particles = new ArrayList<>(cantParticles);
         Random r = new Random();
-        for (int i = 0; i < cant_particles; i++) {
+        for (int i = 0; i < cantParticles; i++) {
             double x = l * r.nextDouble();
             double y = l * r.nextDouble();
-            double angle = (Math.random() * 2 * Math.PI) - Math.PI;
-            DynamicParticle particle = new DynamicParticle(i, radius, rc, x, y, angle, vel);
+            double vx = (Math.random() * 2 * vel) - vel;
+            double vy = (Math.random() * 2 * vel) - vel;
+            MassParticle particle = new MassParticle(i, radius, rc, x, y, vx, vy, mass);
             while (!isValid(particle, particles)) {
                 x = l * r.nextDouble();
                 y = l * r.nextDouble();
-                particle = new DynamicParticle(i, radius, rc, x, y, angle, vel);
+                particle = new MassParticle(i, radius, rc, x, y, vx, vy, mass);
             }
             particles.add(particle);
         }
         return particles;
     }
 
-    private static void generateRepetitions(int repetitions, List<Particle> particles, double rc, double n, double vel, int TMax, double L) {
-        Map<Integer, Map<Integer, Double>> vaRepetitions = new HashMap<>();
-        double density = particles.size() / Math.pow(L, 2);
-        for (int i = 0; i < repetitions; i++) {
-            OffLaticeAutomaton offLaticeAutomaton = new OffLaticeAutomaton(L, rc, particles, true, n, vel);
-            offLaticeAutomaton.simulate(TMax, i == 0, n, density);
-            vaRepetitions.put(i, offLaticeAutomaton.getvaEvolutions());
+    public static void createSimulationFile(List<List<Particle>> simulation, double vel) {
+        try {
+            PrintWriter painter = new PrintWriter("BrownianSimulation vel: " + String.format("%.02f", vel) + ".xyz", "UTF-8");
+            for (int i = 0; i < simulation.size(); i++) {
+                painter.println(simulation.get(0).size());
+                painter.println(i);
+                for (Particle p : simulation.get(i)) {
+                    MassParticle mp = (MassParticle) p;
+                    painter.println(mp.toString());
+                }
+            }
+            painter.close();
+        } catch (Exception e) {
+            Log.debug(e);
         }
     }
 

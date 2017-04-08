@@ -1,5 +1,5 @@
 .idea/*
-TP3.iml
+*.iml
 out/*
 .DS_Store
 *.xyz

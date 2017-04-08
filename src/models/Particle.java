@@ -36,13 +36,13 @@ public class Particle {
         double hyp = Math.sqrt(dx * dx + dy * dy);
         return hyp - p.getRadius() - q.getRadius();
     }
-
-    public static String getXYZformat(Particle particle, int R, int G, int B) {
-        return particle.getRadius() + "\t" + particle.getId() + "\t" + particle.getPosition().x + "\t" + particle.getPosition().y + "\t" + R + "\t" + G + "\t" + B;
-    }
-
-    public void setPosition(double x, double y) {
-        this.position = new Point(x, y);
-    }
+//
+//    public static String getXYZformat(Particle particle, int R, int G, int B) {
+//        return particle.getRadius() + "\t" + particle.getId() + "\t" + particle.getPosition().x + "\t" + particle.getPosition().y + "\t" + R + "\t" + G + "\t" + B;
+//    }
+//
+//    public void setPosition(double x, double y) {
+//        this.position = new Point(x, y);
+//    }
 
 }
