@@ -18,7 +18,7 @@ public class BrownianMotion extends CellIndexMethod {
 
     private List<List<Particle>> simulation = new ArrayList<>();
 
-    private final double TIME_GRANULARITY = 0.012;
+    private final double TIME_GRANULARITY = 0.0005;
 
     private final double EPSILON = 0.000001;
 
@@ -29,8 +29,12 @@ public class BrownianMotion extends CellIndexMethod {
 
     public List<List<Particle>> simulate(double time) {
         double t = 0.0;
+        int cant = 0;
         while (t < time) {
-            System.out.print(".");
+            if(cant % 1200 == 0)
+                System.out.println(cant/1200 + " %");
+            cant++;
+
             List<Particle> currentState = simulation.get(simulation.size() - 1);
             reloadMatrix(currentState);
 
@@ -44,6 +48,9 @@ public class BrownianMotion extends CellIndexMethod {
                 currentState = intermediateState;
                 tc -= TIME_GRANULARITY;
                 collision.setTc(tc);
+                cant++;
+                if(cant % 1200 == 0)
+                    System.out.println(cant/1200 + " %");
             }
 
             currentState = simulation.get(simulation.size() - 1);

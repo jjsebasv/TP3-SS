@@ -15,13 +15,13 @@ public class main {
     public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
 
         // N - L - RC - n - v - T
-        int N = 100;
+        int N = 300;
         double L = 0.5;
         double vel = 0.1;
         double Rc = 0.5;
         double radius = 0.005;
         double mass = 0.1;
-        double time = 100;
+        double time = 60;
 
         List<Particle> particles = generateRandomBrownianMotionState(N, L, radius, Rc, vel, mass);
 
@@ -55,7 +55,7 @@ public class main {
     public static void createSimulationFile(List<List<Particle>> simulation, double vel) {
         try {
             PrintWriter painter = new PrintWriter("BrownianSimulation vel: " + String.format("%.02f", vel) + ".xyz", "UTF-8");
-            for (int i = 0; i < simulation.size(); i++) {
+            for (int i = 0; i < simulation.size(); i+=33) {
                 painter.println(simulation.get(0).size());
                 painter.println(i);
                 for (Particle p : simulation.get(i)) {
