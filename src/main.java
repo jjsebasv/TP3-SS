@@ -15,7 +15,7 @@ public class main {
     public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
 
         // N - L - RC - n - v - T
-        int N = 300;
+        int N = 200;
         double L = 0.5;
         double vel = 0.1;
         double Rc = 0.5;
