@@ -7,10 +7,8 @@ import models.Collision;
 import models.CollisionedWith;
 import models.MassParticle;
 import models.Particle;
-import sun.applet.resources.MsgAppletViewer_sv;
 
 import java.io.PrintWriter;
-import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -34,6 +32,9 @@ public class BrownianMotion extends CellIndexMethod {
 
     private int lastRemovedFrame = 1;
 
+    private int cantCollisions = 0;
+
+    private List<Double> collisionTimes = new ArrayList<>();
 
     public BrownianMotion(double l, double rc, List<Particle> particles, int time) {
         super(l, rc, particles, false);
@@ -53,6 +54,8 @@ public class BrownianMotion extends CellIndexMethod {
 
             Collision collision = getNextCollision(currentState);
             double tc = collision.getTc();
+            cantCollisions++;
+            collisionTimes.add(tc);
             while (tc > TIME_GRANULARITY) {
                 List<Particle> intermediateState = evolveSystem(currentState, collision);
                 t += TIME_GRANULARITY;
@@ -77,17 +80,27 @@ public class BrownianMotion extends CellIndexMethod {
             cant++;
             showPercentage();
         }
+        System.out.println("Collision Frequency: " + cantCollisions / simulationTime + " col/seg");
 
+        double sum = 0;
+        for (Double tc : collisionTimes) {
+            sum += tc;
+        }
+
+        System.out.println("Collision time average: " + sum / collisionTimes.size());
+//        System.out.println("Collision times");
+//        for(Double tc : collisionTimes) {
+//            System.out.println(tc);
+//        }
         return simulation;
     }
 
-    // Private functions
     private void showPercentage() {
         if (cant % percentDiff == 0) {
             System.out.println(cant / percentDiff + " %");
         }
 
-        if ((cant % (percentDiff * 10) == 0) ) {
+        if ((cant % (percentDiff * 10) == 0)) {
             removeUnusedFrames();
         }
     }
@@ -96,7 +109,7 @@ public class BrownianMotion extends CellIndexMethod {
         int simulationSize = simulation.size();
         int i;
         for (i = lastRemovedFrame; i < simulationSize; i++) {
-            if(i % framesJump != 0 && i != simulationSize-1) {
+            if (i % framesJump != 0 && i != simulationSize - 1) {
                 simulation.get(i).clear();
             }
         }
@@ -183,18 +196,16 @@ public class BrownianMotion extends CellIndexMethod {
 
     private Pair<Double, MassParticle> getParticleCollisionTime(MassParticle particle, Set<Particle> neighbours) {
         MassParticle colissionedWith = particle;
-        double minTc = -1;
+        double minTc = Double.MAX_VALUE;
 
         for (Particle n : neighbours) {
             MassParticle neighbour = (MassParticle) n;
             if (particle.equals(neighbour))
                 continue;
 
-            double timeToCol = MassParticle.timeToCollision(particle, neighbour);
-            if (minTc == -1) {
-                minTc = timeToCol;
-                colissionedWith = neighbour;
-            } else if (minTc > timeToCol) {
+            double timeToCol = Math.abs(MassParticle.timeToCollision(particle, neighbour));
+
+            if (minTc > timeToCol) {
                 minTc = timeToCol;
                 colissionedWith = neighbour;
             }
@@ -206,18 +217,18 @@ public class BrownianMotion extends CellIndexMethod {
 
     private double getVerticlaWallCollisionTime(MassParticle particle) {
         if (particle.getVx() > 0) {
-            return (this.l - particle.getRadius() - particle.getPosition().x) / particle.getVx();
+            return Math.abs((this.l - particle.getRadius() - particle.getPosition().x) / particle.getVx());
         } else if (particle.getVx() < 0) {
-            return (particle.getRadius() - particle.getPosition().x) / particle.getVx();
+            return Math.abs((particle.getRadius() - particle.getPosition().x) / particle.getVx());
         }
         return Double.MAX_VALUE;
     }
 
     private double getHorizontalWallCollisionTime(MassParticle particle) {
         if (particle.getVy() > 0) {
-            return (this.l - particle.getRadius() - particle.getPosition().y) / particle.getVy();
+            return Math.abs((this.l - particle.getRadius() - particle.getPosition().y) / particle.getVy());
         } else if (particle.getVy() < 0) {
-            return (particle.getRadius() - particle.getPosition().y) / particle.getVy();
+            return Math.abs((particle.getRadius() - particle.getPosition().y) / particle.getVy());
         }
         return Double.MAX_VALUE;
     }
@@ -246,7 +257,7 @@ public class BrownianMotion extends CellIndexMethod {
         try {
             PrintWriter painter = new PrintWriter("BrownianSimulation vel: " + String.format("%.02f", vel) + ".xyz", "UTF-8");
             for (int i = 0; i < simulation.size(); i++) {
-                if(simulation.get(i).size() == 0) continue;
+                if (simulation.get(i).size() == 0) continue;
                 painter.println(simulation.get(0).size());
                 painter.println(i);
                 for (Particle p : simulation.get(i)) {

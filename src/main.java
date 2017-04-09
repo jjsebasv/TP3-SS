@@ -14,10 +14,10 @@ public class main {
     public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
 
         // N - L - RC - n - v - T
-        int N = 300;
+        int N = 250;
         double L = 0.5;
         double vel = 0.1;
-        double Rc = 0.1;
+        double Rc = 0.05;
         double radius = 0.005;
         double mass = 0.1;
         int time = 60;
