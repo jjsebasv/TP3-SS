@@ -1,6 +1,7 @@
 package models;
 
-import java.util.Objects;
+
+import com.sun.tools.javac.util.Pair;
 
 /**
  * Created by sebastian on 4/6/17.
@@ -12,7 +13,7 @@ public class MassParticle extends DynamicParticle {
     private double vy;
 
     public MassParticle(int id, double radius, double rc, double x, double y, double vx, double vy, double mass) {
-        super(id, radius, rc, x, y, Math.atan2(vy, vx), Math.sqrt( Math.pow(vx, 2) + Math.pow(vy, 2) ));
+        super(id, radius, rc, x, y, Math.atan2(vy, vx), Math.sqrt(Math.pow(vx, 2) + Math.pow(vy, 2)));
         this.mass = mass;
         this.vx = vx;
         this.vy = vy;
@@ -108,7 +109,7 @@ public class MassParticle extends DynamicParticle {
     }
 
     public double getVelocityAngle() {
-        return Math.atan(getVy()/getVx());
+        return Math.atan(getVy() / getVx());
     }
 
 
@@ -118,8 +119,15 @@ public class MassParticle extends DynamicParticle {
     }
 
     public boolean equals(MassParticle mp) {
-        if(mp != null && getId() == mp.getId())
-            return true;
-        return false;
+        return mp != null && getId() == mp.getId();
+    }
+
+    public Pair<Double, Double> getVelAfterCollision(MassParticle particle) {
+
+        double newVx = (((mass - particle.getMass()) * vx) + particle.getMass()*2*particle.getVx()) / (mass + particle.getMass());
+        double newVy = (((mass - particle.getMass()) * vy) + particle.getMass()*2*particle.getVy()) / (mass + particle.getMass());
+
+        return new Pair<>(newVx, newVy);
+
     }
 }

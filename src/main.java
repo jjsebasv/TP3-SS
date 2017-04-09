@@ -1,5 +1,4 @@
 import brownianmotion.BrownianMotion;
-import com.oracle.tools.packager.Log;
 import models.MassParticle;
 import models.Particle;
 
@@ -15,27 +14,29 @@ public class main {
     public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
 
         // N - L - RC - n - v - T
-        int N = 200;
+        int N = 300;
         double L = 0.5;
         double vel = 0.1;
-        double Rc = 0.5;
+        double Rc = 0.1;
         double radius = 0.005;
         double mass = 0.1;
-        double time = 60;
+        int time = 60;
 
         List<Particle> particles = generateRandomBrownianMotionState(N, L, radius, Rc, vel, mass);
 
-        BrownianMotion brownianMotion = new BrownianMotion(L, Rc, particles);
+        BrownianMotion brownianMotion = new BrownianMotion(L, Rc, particles, time);
 
         List<List<Particle>> simulation = brownianMotion.simulate(time);
 
-        createSimulationFile(simulation, vel);
+        brownianMotion.createSimulationFile(simulation, vel);
 
     }
 
     private static List<Particle> generateRandomBrownianMotionState(int cantParticles, double l, double radius, double rc, double vel, double mass) {
         List<Particle> particles = new ArrayList<>(cantParticles);
         Random r = new Random();
+        MassParticle bigParticle = new MassParticle(cantParticles + 1, 0.05, rc, 0.25, 0.25, 0, 0, 100);
+        particles.add(bigParticle);
         for (int i = 0; i < cantParticles; i++) {
             double x = l * r.nextDouble();
             double y = l * r.nextDouble();
@@ -50,23 +51,6 @@ public class main {
             particles.add(particle);
         }
         return particles;
-    }
-
-    public static void createSimulationFile(List<List<Particle>> simulation, double vel) {
-        try {
-            PrintWriter painter = new PrintWriter("BrownianSimulation vel: " + String.format("%.02f", vel) + ".xyz", "UTF-8");
-            for (int i = 0; i < simulation.size(); i+=33) {
-                painter.println(simulation.get(0).size());
-                painter.println(i);
-                for (Particle p : simulation.get(i)) {
-                    MassParticle mp = (MassParticle) p;
-                    painter.println(mp.toString());
-                }
-            }
-            painter.close();
-        } catch (Exception e) {
-            Log.debug(e);
-        }
     }
 
 
