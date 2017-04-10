@@ -1,7 +1,7 @@
 package models;
 
 
-import com.sun.tools.javac.util.Pair;
+import javafx.util.Pair;
 
 /**
  * Created by sebastian on 4/6/17.

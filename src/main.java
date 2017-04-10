@@ -17,18 +17,17 @@ public class main {
         int N = 250;
         double L = 0.5;
         double vel = 0.1;
-        double Rc = 0.05;
+        double Rc = 0.1;
         double radius = 0.005;
         double mass = 0.1;
-        int time = 60;
+        int time = 180;
 
         List<Particle> particles = generateRandomBrownianMotionState(N, L, radius, Rc, vel, mass);
 
         BrownianMotion brownianMotion = new BrownianMotion(L, Rc, particles, time);
 
         List<List<Particle>> simulation = brownianMotion.simulate(time);
-
-        brownianMotion.createSimulationFile(simulation, vel);
+        brownianMotion.createSimulationFile(simulation, vel, N);
 
     }
 

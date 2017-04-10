@@ -1,8 +1,8 @@
 package brownianmotion;
 
 import cellindexmethod.CellIndexMethod;
-import com.oracle.tools.packager.Log;
-import com.sun.tools.javac.util.Pair;
+
+import javafx.util.Pair;
 import models.Collision;
 import models.CollisionedWith;
 import models.MassParticle;
@@ -80,24 +80,36 @@ public class BrownianMotion extends CellIndexMethod {
             cant++;
             showPercentage();
         }
-        System.out.println("Collision Frequency: " + cantCollisions / simulationTime + " col/seg");
+        System.out.println();
+        //System.out.println("Collision Frequency:\t" + cantCollisions / simulationTime + "\tcol/seg");
 
         double sum = 0;
         for (Double tc : collisionTimes) {
             sum += tc;
         }
 
-        System.out.println("Collision time average: " + sum / collisionTimes.size());
-//        System.out.println("Collision times");
-//        for(Double tc : collisionTimes) {
-//            System.out.println(tc);
-//        }
+        //System.out.println("Collision time average:\t" + String.format(Locale.FRENCH, "%.10f", sum / collisionTimes.size()));
+        //System.out.println("Collision times");
+
+        double twoThirds = (2 * simulationTime) / 3;
+        /*/ Print collision times
+        double tcAux = 0;
+        for(Double tc : collisionTimes) {
+            if (tcAux > twoThirds) {
+                System.out.println(String.format(Locale.FRENCH, "%.3f", tc*1000));
+            }
+            tcAux += tc;
+        }
+
+        // Print velocities
+        printVelocities(twoThirds);
+        */
         return simulation;
     }
 
     private void showPercentage() {
         if (cant % percentDiff == 0) {
-            System.out.println(cant / percentDiff + " %");
+            System.out.print(".");
         }
 
         if ((cant % (percentDiff * 10) == 0)) {
@@ -160,7 +172,7 @@ public class BrownianMotion extends CellIndexMethod {
 
             Pair<Double, Double> newVel = handleCollision(mp, collision);
 
-            MassParticle newMp = new MassParticle(mp.getId(), mp.getRadius(), mp.getRc(), newX, newY, newVel.fst, newVel.snd, mp.getMass());
+            MassParticle newMp = new MassParticle(mp.getId(), mp.getRadius(), mp.getRc(), newX, newY, newVel.getKey(), newVel.getValue(), mp.getMass());
 
             nextParticles.add(newMp);
         }
@@ -173,7 +185,7 @@ public class BrownianMotion extends CellIndexMethod {
         double newVy = mp.getVy();
 
         if (TIME_GRANULARITY >= collision.getTc() &&
-                (mp.equals(collision.getParticles().fst) || mp.equals(collision.getParticles().snd))) {
+                (mp.equals(collision.getParticles().getKey()) || mp.equals(collision.getParticles().getValue()))) {
             switch (collision.getCollisionedWith()) {
                 case HORIZONTAL_WALL:
                     newVy = mp.getVy() * -1;
@@ -185,7 +197,7 @@ public class BrownianMotion extends CellIndexMethod {
                     break;
                 case PARTICLE:
                     MassParticle counterpart =
-                            mp.equals(collision.getParticles().fst) ? collision.getParticles().snd : collision.getParticles().fst;
+                            mp.equals(collision.getParticles().getKey()) ? collision.getParticles().getValue() : collision.getParticles().getKey();
                     return mp.getVelAfterCollision(counterpart);
 
             }
@@ -240,7 +252,7 @@ public class BrownianMotion extends CellIndexMethod {
         tcs.add(getHorizontalWallCollisionTime(mp));
 
         Pair<Double, MassParticle> particleTc = getParticleCollisionTime(mp, neighbours);
-        tcs.add(particleTc.fst);
+        tcs.add(particleTc.getKey());
 
         double minTc = Collections.min(tcs);
 
@@ -249,13 +261,27 @@ public class BrownianMotion extends CellIndexMethod {
         } else if (tcs.indexOf(minTc) == CollisionedWith.HORIZONTAL_WALL.ordinal()) {
             return new Collision(minTc, CollisionedWith.HORIZONTAL_WALL, new Pair<>(mp, null));
         } else {
-            return new Collision(minTc, CollisionedWith.PARTICLE, new Pair<>(mp, particleTc.snd));
+            return new Collision(minTc, CollisionedWith.PARTICLE, new Pair<>(mp, particleTc.getValue()));
         }
     }
 
-    public void createSimulationFile(List<List<Particle>> simulation, double vel) {
+    private void printVelocities(double twoThirds) {
+        int k = 0;
+        for (List<Particle> lp : simulation) {
+            if (lp.size() > 0 && k > ((twoThirds*simulation.size())/simulationTime)) {
+                for (Particle p : lp) {
+                    MassParticle mp = (MassParticle) p;
+                    System.out.print(String.format(Locale.FRENCH, "%.4f", mp.getVelocityModule()) + "\t");
+                }
+                System.out.println();
+            }
+            k++;
+        }
+    }
+
+    public static void createSimulationFile(List<List<Particle>> simulation, double vel, int N) {
         try {
-            PrintWriter painter = new PrintWriter("BrownianSimulation vel: " + String.format("%.02f", vel) + ".xyz", "UTF-8");
+            PrintWriter painter = new PrintWriter("BrownianSimulation vel: " + String.format("%.02f", vel) + " N: " + N + ".xyz", "UTF-8");
             for (int i = 0; i < simulation.size(); i++) {
                 if (simulation.get(i).size() == 0) continue;
                 painter.println(simulation.get(0).size());
@@ -267,7 +293,7 @@ public class BrownianMotion extends CellIndexMethod {
             }
             painter.close();
         } catch (Exception e) {
-            Log.debug(e);
+            System.out.println(e);
         }
     }
 
